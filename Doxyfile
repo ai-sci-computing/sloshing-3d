@@ -1,0 +1,28 @@
+# Doxyfile for Sloshing Tank 3D
+PROJECT_NAME           = "Sloshing Tank 3D"
+PROJECT_NUMBER         = 0.1.0
+PROJECT_BRIEF          = "Interactive 3D sloshing tank simulation with CLSVOF"
+
+OUTPUT_DIRECTORY       = docs
+INPUT                  = include src mainpage.dox
+FILE_PATTERNS          = *.h *.cpp *.dox
+RECURSIVE              = YES
+EXTRACT_ALL            = YES
+EXTRACT_PRIVATE        = YES
+EXTRACT_STATIC         = YES
+
+GENERATE_HTML          = YES
+GENERATE_LATEX         = NO
+HTML_COLORSTYLE        = LIGHT
+
+HAVE_DOT               = NO
+SOURCE_BROWSER         = YES
+INLINE_SOURCES         = NO
+REFERENCED_BY_RELATION = YES
+REFERENCES_RELATION    = YES
+
+OPTIMIZE_OUTPUT_FOR_C  = NO
+BUILTIN_STL_SUPPORT    = YES
+
+QUIET                  = YES
+WARNINGS               = YES

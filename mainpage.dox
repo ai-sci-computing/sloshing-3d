@@ -1,0 +1,76 @@
+/**
+@mainpage Sloshing Tank 3D
+
+@section intro Overview
+
+A real-time interactive 3D sloshing tank simulation using CLSVOF (Coupled Level Set / Volume of Fluid)
+on a MAC staggered grid, rendered with marching cubes and OpenGL 4.1. Targets M3 Mac at 30+ fps.
+
+@section arch Architecture
+
+The simulation pipeline runs each timestep in this order:
+
+1. Apply body forces (gravity + non-inertial pseudo-forces from tank motion)
+2. Enforce wall boundary conditions
+3. Pressure projection via PCG with MIC(0) preconditioning
+4. Extend fluid velocities into air (3 layers)
+5. Advect velocity (semi-Lagrangian with RK2 backtracing)
+6. Advect level set (semi-Lagrangian) and VOF (TVD Superbee flux-form)
+7. CLSVOF coupling: VOF-to-LS correction, reinitialization, cell reclassification
+8. Volume tracking for diagnostics
+
+@section classes Key Classes
+
+- @ref sloshing::MACGrid "MACGrid" -- Staggered grid storing velocities at face centers,
+  pressure/phi/VOF at cell centers.
+- @ref sloshing::Simulation "Simulation" -- Main driver orchestrating the timestep pipeline
+  with adaptive CFL-based timestepping.
+- @ref sloshing::PressureSolver "PressureSolver" -- Preconditioned Conjugate Gradient solver
+  with Modified Incomplete Cholesky (MIC(0)) preconditioning.
+- @ref sloshing::Renderer "Renderer" -- OpenGL 4.1 renderer with marching cubes surface
+  extraction, Phong+Fresnel shading, and MSAA.
+- @ref sloshing::Array3D "Array3D" -- 3D array with flat storage and (i,j,k) indexing.
+- @ref sloshing::ThreadPool "ThreadPool" -- Persistent thread pool with generation-based
+  synchronization for parallel grid operations.
+
+@section modules Modules by File
+
+| Header | Purpose |
+|--------|---------|
+| grid.h | MAC grid data structures, cell classification, velocity interpolation |
+| simulation.h | Timestep driver, body forces, adaptive dt |
+| pressure_solver.h | PCG + MIC(0) Poisson solver |
+| advection.h | Semi-Lagrangian advection, TVD VOF advection, PLIC geometry |
+| clsvof.h | Level set / VOF coupling, reinitialization, volume computation |
+| renderer.h | OpenGL rendering, marching cubes, camera, overlay |
+| parallel.h | Thread pool, parallel_for, parallel_reduce |
+| fluid_utils.h | Ghost fluid theta, smooth Heaviside/delta, WENO5 interpolation |
+
+@section controls Interactive Controls
+
+- **Drag**: Shake the tank (spring-damper physics)
+- **Option+drag**: Tilt the tank (rotates gravity direction)
+- **Scroll**: Zoom camera
+- **R**: Reset simulation
+- **F**: Reset camera and tilt
+- **Esc**: Quit
+
+@section build Building
+
+@code
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+./build/sloshing3d            # Run with default 32x16x32 grid
+./build/sloshing3d 48 24 48  # Run with custom resolution
+@endcode
+
+@section validation Validation
+
+28 tests covering:
+- PLIC volume computation (analytical formula, symmetry, degenerate cases)
+- VOF conservation (static and dynamic)
+- Level set reinitialization (signed distance property)
+- CLSVOF coupling (bidirectional correction)
+- Pressure solver (zero velocity, divergence-free, hydrostatic)
+- Physics validation (standing wave frequency, amplitude retention, energy, volume)
+*/
